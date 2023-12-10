@@ -30,9 +30,9 @@ export class AuthService {
         // }
       })
       
-          delete user.hash;
+          // delete user.hash;
           // return saved user
-          return user;
+          return this.signToken(user.id, user.email);
 
     }
     catch (error) {
@@ -46,7 +46,7 @@ export class AuthService {
     };
   }
 
-  async signin(dto: AuthDto) {
+  async signin(dto: AuthDto): Promise<{access_token: string}> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email
@@ -59,20 +59,23 @@ export class AuthService {
 
     if(!pwMatches) throw new ForbiddenException("Credentials incorrect");
 
+
     return this.signToken(user.id, user.email);
   }
 
-  signToken(userId: number, email: string) {
+  async signToken(userId: number, email: string) {
     const payload = {
       sub: userId,
       email,
 
     };
-    const secret = this.config.get('JWT_SECRET')
+    const secret = this.config.get('JWT_SECRET');
 
-    return this.jwt.signAsync(payload, 
+    const token = await this.jwt.signAsync(payload, 
       {expiresIn: '15m',
       secret
     })
+
+    return {access_token: token}
   }
 }
