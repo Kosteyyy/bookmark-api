@@ -19,5 +19,7 @@ jobs:
         run: npm run build
       - name: run tests
         run: npm run test
+        env:
+          DATABASE_URL: ${{env.DATABASE_URL}}
       - name: run lint
         run: npm run lint
